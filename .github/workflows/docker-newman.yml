@@ -36,7 +36,7 @@ jobs:
             -e SERVICE_NAME=iot-ingestion \
             -e SERVICE_VERSION=0.4.0 \
             -e LOG_LEVEL=INFO \
-            -e AUTH_TOKEN=local-dev-token-for-ci \
+            -e AUTH_TOKEN=local-dev-token \
             fit4110/iot-ingestion:lab04
 
       - name: Debug - Container status & logs
