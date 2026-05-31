@@ -2,6 +2,7 @@ name: Lab04 Docker and Newman Verification
 
 on:
   push:
+    branches: [ main, master ]
   pull_request:
 
 jobs:
@@ -17,43 +18,46 @@ jobs:
           node-version: "20"
           cache: "npm"
 
-      - name: Install Node dependencies
+      - name: Install dependencies
         run: npm ci
 
       - name: Lint OpenAPI contract
         run: npm run lint:openapi
 
       - name: Build Docker image
-        run: docker build -t fit4110/iot-ingestion:lab04 .
+        run: docker build --no-cache -t fit4110/iot-ingestion:lab04 .
 
-      # SỬA TẠI ĐÂY: Truyền trực tiếp -e thay vì dùng --env-file để không bị phụ thuộc vào file ngoài
       - name: Run Docker container
         run: |
           docker run -d --rm \
             --name fit4110-iot-lab04 \
             -p 8000:8000 \
+            -e APP_ENV=production \
             -e SERVICE_NAME=iot-ingestion \
             -e SERVICE_VERSION=0.4.0 \
-            -e AUTH_TOKEN=local-dev-token \
+            -e LOG_LEVEL=INFO \
+            -e AUTH_TOKEN=local-dev-token-for-ci \
             fit4110/iot-ingestion:lab04
 
-      - name: Debug Check Container Status
+      - name: Debug - Container status & logs
         run: |
-          sleep 5
-          echo "=== TRẠNG THÁI CONTAINER ==="
+          sleep 8
+          echo "=== CONTAINER STATUS ==="
           docker ps -a
-          echo "=== LOGS CHI TIẾT ==="
+          echo "=== CONTAINER LOGS ==="
           docker logs fit4110-iot-lab04
 
-      - name: Wait for service health
-        run: npx wait-on http://localhost:8000/health --timeout 30000
+      - name: Wait for service to be healthy
+        run: |
+          npx wait-on --timeout 30000 http://127.0.0.1:8000/health || \
+          (echo "Health check failed" && docker logs fit4110-iot-lab04 && exit 1)
 
-      - name: Run Newman against Docker container
+      - name: Run Newman tests on Docker container
         run: npm run test:local
 
-      - name: Show container logs on failure
+      - name: Show full logs if test failed
         if: failure()
-        run: docker logs fit4110-iot-lab04 || true
+        run: docker logs fit4110-iot-lab04
 
       - name: Stop container
         if: always()
