@@ -173,6 +173,7 @@ def next_reading_id():
 
 
 def now_iso():
+    # Đã sửa: Gọi trực tiếp đối tượng timezone độc lập được import ở đầu file
     return datetime.now(timezone.utc).isoformat()
 
 
