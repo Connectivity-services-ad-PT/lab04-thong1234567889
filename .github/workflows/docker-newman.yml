@@ -26,19 +26,23 @@ jobs:
       - name: Build Docker image
         run: docker build -t fit4110/iot-ingestion:lab04 .
 
+      # SỬA TẠI ĐÂY: Truyền trực tiếp -e thay vì dùng --env-file để không bị phụ thuộc vào file ngoài
       - name: Run Docker container
         run: |
           docker run -d --rm \
             --name fit4110-iot-lab04 \
             -p 8000:8000 \
-            --env-file .env.example \
+            -e SERVICE_NAME=iot-ingestion \
+            -e SERVICE_VERSION=0.4.0 \
+            -e AUTH_TOKEN=local-dev-token \
             fit4110/iot-ingestion:lab04
 
-      # Kiểm tra log ngay lập tức để phát hiện lỗi crash sớm nếu có
       - name: Debug Check Container Status
         run: |
-          sleep 3
+          sleep 5
+          echo "=== TRẠNG THÁI CONTAINER ==="
           docker ps -a
+          echo "=== LOGS CHI TIẾT ==="
           docker logs fit4110-iot-lab04
 
       - name: Wait for service health
