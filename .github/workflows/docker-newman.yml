@@ -34,6 +34,13 @@ jobs:
             --env-file .env.example \
             fit4110/iot-ingestion:lab04
 
+      # Kiểm tra log ngay lập tức để phát hiện lỗi crash sớm nếu có
+      - name: Debug Check Container Status
+        run: |
+          sleep 3
+          docker ps -a
+          docker logs fit4110-iot-lab04
+
       - name: Wait for service health
         run: npx wait-on http://localhost:8000/health --timeout 30000
 
