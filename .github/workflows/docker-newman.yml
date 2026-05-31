@@ -49,7 +49,7 @@ jobs:
 
       - name: Wait for service to be healthy
         run: |
-          npx wait-on --timeout 30000 http://127.0.0.1:8000/health || \
+          npx wait-on --timeout 30000 --httpVerb GET http://127.0.0.1:8000/health || \
           (echo "Health check failed" && docker logs fit4110-iot-lab04 && exit 1)
 
       - name: Run Newman tests on Docker container
